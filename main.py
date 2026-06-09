@@ -1,5 +1,15 @@
 import csv
 
+ARCHIVO_CSV = "dataset-paises.csv"
+
+CONTINENTES_VALIDOS = [
+    "América",
+    "Europa",
+    "Asia",
+    "África",
+    "Oceanía"
+]
+
 
 # =========================
 # CARGA Y GUARDADO CSV
@@ -21,18 +31,33 @@ def cargar_csv(nombre_archivo):
 
             for fila in lector:
 
-                pais = {
-                    "nombre": fila["nombre"],
-                    "poblacion": int(fila["poblacion"]),
-                    "superficie": int(fila["superficie"]),
-                    "continente": fila["continente"]
-                }
+                try:
 
-                paises.append(pais)
+                    fila = {
+                        clave.strip(): valor.strip()
+                        for clave, valor in fila.items()
+                    }
+
+                    pais = {
+                        "nombre": fila["nombre"],
+                        "poblacion": int(fila["poblacion"]),
+                        "superficie": int(fila["superficie"]),
+                        "continente": fila["continente"]
+                    }
+
+                    paises.append(pais)
+
+                except (ValueError, KeyError):
+
+                    print("Error en una fila del CSV.")
 
     except FileNotFoundError:
 
         print("No se encontró el archivo.")
+
+    except Exception as error:
+
+        print("Error al leer el CSV:", error)
 
     return paises
 
@@ -121,6 +146,11 @@ def mostrar_pais(pais):
 # Muestra una lista de los países
 def mostrar_lista_paises(paises):
 
+    if len(paises) == 0:
+
+        print("No hay países para mostrar.")
+        return
+
     for pais in paises:
 
         mostrar_pais(pais)
@@ -152,9 +182,16 @@ def agregar_pais(paises):
         "Ingrese la superficie: "
     )
 
-    continente = validar_texto(
-        "Ingrese el continente: "
-    )
+    while True:
+
+        continente = validar_texto(
+            "Ingrese el continente: "
+        )
+
+        if continente in CONTINENTES_VALIDOS:
+            break
+
+        print("Continente inválido. Use: América, Europa, Asia, África u Oceanía.")
 
     nuevo_pais = {
         "nombre": nombre,
@@ -164,7 +201,7 @@ def agregar_pais(paises):
     }
 
     paises.append(nuevo_pais)
-    guardar_csv("paises.csv", paises)
+    guardar_csv(ARCHIVO_CSV, paises)
 
     print("País agregado correctamente.")
 
@@ -193,7 +230,7 @@ def actualizar_pais(paises):
 
             pais["poblacion"] = nueva_poblacion
             pais["superficie"] = nueva_superficie
-            guardar_csv("paises.csv", paises)
+            guardar_csv(ARCHIVO_CSV, paises)
 
             print("País actualizado correctamente.")
 
@@ -342,7 +379,7 @@ def ordenar_por_nombre(paises):
 
         for j in range(i + 1, n):
 
-            if paises_ordenados[j]["nombre"] < paises_ordenados[indice_minimo]["nombre"]:
+            if paises_ordenados[j]["nombre"].lower() < paises_ordenados[indice_minimo]["nombre"].lower():
 
                 indice_minimo = j
 
@@ -690,7 +727,7 @@ def menu_principal(paises):
 # Función principal.
 def main():
 
-    paises = cargar_csv("paises.csv")
+    paises = cargar_csv(ARCHIVO_CSV)
 
     menu_principal(paises)
 
